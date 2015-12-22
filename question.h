@@ -5,7 +5,6 @@
 
 class Question{
 public:
-    Question(qint64 start_time, qint64 end_time, const QString &words);
     Question(){};
     qint64 start_time;
     qint64 end_time;

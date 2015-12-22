@@ -8,13 +8,12 @@ QT       += core gui multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = listener
+TARGET = E-listener
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        listener.cpp \
-    question.cpp
+        elistener.cpp
 
-HEADERS  += listener.h \
+HEADERS  += elistener.h \
     question.h

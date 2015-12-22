@@ -10,6 +10,7 @@
 #include<QVector>
 #include<QTimer>
 #include"question.h"
+#include<QLabel>
 
 class EListener : public QWidget
 {
@@ -24,7 +25,9 @@ public slots:
     void next();
     void answer();
     void checkAnswer();
+    void changeDiff();
 private:
+    void getQuestion();
     qint64 strToInt(const QString &str);
     QPlainTextEdit *text;
     QLineEdit *input_box;
@@ -33,10 +36,13 @@ private:
     QPushButton *next_button;
     QPushButton *answer_button;
     QPushButton *open_button;
+    QPushButton *diff_button;
     QMediaPlayer *player;
     QVector<Question> *questions;
     QTimer *timer;
+    QLabel *message,*correct_mes,*incorrect_mes,*percent_mes;
     int present_question_index;
+    int hits,correct,incorrect,difficulty;
 };
 
 #endif // ELISTENER_H
