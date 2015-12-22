@@ -18,6 +18,8 @@
 
 EListener::EListener(QWidget *parent)
     : QWidget(parent){
+    front_delay = 0;
+    back_delay = 0;
     //srand by current time
     QTime time = QTime::currentTime();
     qsrand(time.msec()+1000*time.second());
@@ -158,9 +160,9 @@ void EListener::openFile(){
 void EListener::play(){
     timer->stop();
     qint64 begin = questions->at(present_question_index).start_time;
-    begin = begin-800<0?0:begin-800;
+    begin = begin-front_delay<0?0:begin-front_delay;
     player->setPosition(begin);
-    qint64 duration = questions->at(present_question_index).end_time - questions->at(present_question_index).start_time + 800;
+    qint64 duration = questions->at(present_question_index).end_time - questions->at(present_question_index).start_time + front_delay + back_delay;
     connect(timer,SIGNAL(timeout()),player,SLOT(pause()));
     timer->start(duration);
     player->play();
@@ -177,11 +179,24 @@ void EListener::answer(){
 
 void EListener::checkAnswer(){
     QString answer_word = input_box->text();
+    input_box->clear();
+    //check command
+    if(answer_word[0]=='-'){
+        //delay command
+        if(answer_word[1]=='d'){
+            QStringList commands = answer_word.split(" ");
+            front_delay = commands[1].toInt();
+            back_delay = commands[2].toInt();
+        }
+        return;
+    }
+    //fill blank if it's easy mod
     if(difficulty==0){
         QString hint = text->toPlainText();
         hint.replace("___",answer_word);
         answer_word = hint;
     }
+    //check answer is right or wrong
     if(answer_word == questions->at(present_question_index).words){
         hits++;
         correct++;
@@ -192,20 +207,18 @@ void EListener::checkAnswer(){
         incorrect++;
         play();
     }
+    //set message
     message->setText(QString("hits:")+QString::number(hits));
     correct_mes->setText(QString("correct:")+QString::number(correct));
     incorrect_mes->setText(QString("incorrect:")+QString::number(incorrect));
     percent_mes->setText(QString("percent:")+QString::number(((double)correct)/(incorrect+correct)));
-    input_box->clear();
 }
 
 void EListener::getQuestion(){
     present_question_index = qrand()%(questions->size());
     if(difficulty==0){
         QString hint = questions->at(present_question_index).words;
-        QStringList words = hint.split(" ");
-        QString word = words[qrand()%(words.size())];
-        hint.replace(word,QString("___"));
+        makeBlank(hint);
         text->setPlainText(hint);
     }
     else{
@@ -215,6 +228,27 @@ void EListener::getQuestion(){
 
 void EListener::changeDiff(){
     difficulty = (!difficulty);
+}
+
+void EListener::makeBlank(QString &hint){
+    //get a letter as begin
+    int begin = qrand()%(hint.size());
+    while(!hint[begin].isLetter()){
+        begin = qrand()%(hint.size());
+    }
+    //present length
+    int length = 1;
+    //go forward
+    while(begin+length<hint.size() && hint[begin+length].isLetter()){
+        length++;
+    }
+    //go back
+    while(begin!=0 && hint[begin-1].isLetter()){
+        begin--;
+        length++;
+    }
+    //replace word to blank
+    hint.replace(begin,length,"___");
 }
 
 qint64 EListener::strToInt(const QString &str){

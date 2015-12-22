@@ -27,6 +27,7 @@ public slots:
     void checkAnswer();
     void changeDiff();
 private:
+    void makeBlank(QString &hint);
     void getQuestion();
     qint64 strToInt(const QString &str);
     QPlainTextEdit *text;
@@ -43,6 +44,7 @@ private:
     QLabel *message,*correct_mes,*incorrect_mes,*percent_mes;
     int present_question_index;
     int hits,correct,incorrect,difficulty;
+    int front_delay,back_delay;
 };
 
 #endif // ELISTENER_H
