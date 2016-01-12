@@ -45,6 +45,7 @@ private:
     int present_question_index;
     int hits,correct,incorrect,difficulty;
     int front_delay,back_delay;
+    int answered;
 };
 
 #endif // ELISTENER_H

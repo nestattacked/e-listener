@@ -18,28 +18,26 @@
 
 EListener::EListener(QWidget *parent)
     : QWidget(parent){
-    front_delay = 0;
-    back_delay = 0;
     //srand by current time
     QTime time = QTime::currentTime();
     qsrand(time.msec()+1000*time.second());
 
     //initialize widget
-    text = new QPlainTextEdit;
-    input_box = new QLineEdit;
-    video_widget = new QVideoWidget;
-    play_button = new QPushButton;
-    next_button = new QPushButton;
-    answer_button= new QPushButton;
-    open_button = new QPushButton;
-    diff_button = new QPushButton;
-    player = new QMediaPlayer;
+    text = new QPlainTextEdit(this);
+    input_box = new QLineEdit(this);
+    video_widget = new QVideoWidget(this);
+    play_button = new QPushButton(this);
+    next_button = new QPushButton(this);
+    answer_button= new QPushButton(this);
+    open_button = new QPushButton(this);
+    diff_button = new QPushButton(this);
+    player = new QMediaPlayer(this);
     questions = new QVector<Question>;
     timer = new QTimer;
-    message = new QLabel("Welcom here!");
-    correct_mes = new QLabel;
-    incorrect_mes = new QLabel;
-    percent_mes = new QLabel;
+    message = new QLabel("Welcom here!",this);
+    correct_mes = new QLabel(this);
+    incorrect_mes = new QLabel(this);
+    percent_mes = new QLabel(this);
 
     player->setVolume(100);
     //initialize timer
@@ -124,6 +122,8 @@ void EListener::openFile(){
         correct=0;
         incorrect=0;
         difficulty=0;
+        front_delay=0;
+        back_delay=0;
         message->setText(QString("hits:")+QString::number(hits));
         correct_mes->setText(QString("correct:")+QString::number(correct));
         incorrect_mes->setText(QString("incorrect:")+QString::number(incorrect));
@@ -174,6 +174,7 @@ void EListener::next(){
 }
 
 void EListener::answer(){
+    answered = 1;
     text->setPlainText(questions->at(present_question_index).words);
 }
 
@@ -190,6 +191,8 @@ void EListener::checkAnswer(){
         }
         return;
     }
+    if(answered)
+        return;
     //fill blank if it's easy mod
     if(difficulty==0){
         QString hint = text->toPlainText();
@@ -215,6 +218,7 @@ void EListener::checkAnswer(){
 }
 
 void EListener::getQuestion(){
+    answered = 0;
     present_question_index = qrand()%(questions->size());
     if(difficulty==0){
         QString hint = questions->at(present_question_index).words;
@@ -228,6 +232,7 @@ void EListener::getQuestion(){
 
 void EListener::changeDiff(){
     difficulty = (!difficulty);
+    next();
 }
 
 void EListener::makeBlank(QString &hint){
