@@ -17,3 +17,9 @@ SOURCES += main.cpp\
 
 HEADERS  += elistener.h \
     question.h
+
+DISTFILES += \
+    logo.ico \
+    logo.rc
+
+RC_FILE += logo.rc
