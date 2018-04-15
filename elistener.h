@@ -26,6 +26,7 @@ public slots:
     void answer();
     void checkAnswer();
     void changeDiff();
+    void changeOrder();
 private:
     void makeBlank(QString &hint);
     void getQuestion();
@@ -38,12 +39,13 @@ private:
     QPushButton *answer_button;
     QPushButton *open_button;
     QPushButton *diff_button;
+    QPushButton *order_button;
     QMediaPlayer *player;
     QVector<Question> *questions;
     QTimer *timer;
     QLabel *message,*correct_mes,*incorrect_mes,*percent_mes;
     int present_question_index;
-    int hits,correct,incorrect,difficulty;
+    int hits,correct,incorrect,difficulty,order;
     int front_delay,back_delay;
     int answered;
 };

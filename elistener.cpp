@@ -31,6 +31,7 @@ EListener::EListener(QWidget *parent)
     answer_button= new QPushButton(this);
     open_button = new QPushButton(this);
     diff_button = new QPushButton(this);
+    order_button = new QPushButton(this);
     player = new QMediaPlayer(this);
     questions = new QVector<Question>;
     timer = new QTimer;
@@ -54,18 +55,21 @@ EListener::EListener(QWidget *parent)
     next_button->setEnabled(false);
     answer_button->setEnabled(false);
     diff_button->setEnabled(false);
+    order_button->setEnabled(false);
     //set button's icon
     play_button->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     open_button->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
     next_button->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
     answer_button->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
     diff_button->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
+    order_button->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
     //set button's shortcut
     open_button->setShortcut(QKeySequence(Qt::Key_F1));
     play_button->setShortcut(QKeySequence(Qt::Key_F2));
     next_button->setShortcut(QKeySequence(Qt::Key_F3));
     answer_button->setShortcut(QKeySequence(Qt::Key_F4));
     diff_button->setShortcut(QKeySequence(Qt::Key_F5));
+    order_button->setShortcut(QKeySequence(Qt::Key_F6));
     //set layout
     QHBoxLayout *control_layout = new QHBoxLayout;
     control_layout->addWidget(open_button);
@@ -73,6 +77,7 @@ EListener::EListener(QWidget *parent)
     control_layout->addWidget(next_button);
     control_layout->addWidget(answer_button);
     control_layout->addWidget(diff_button);
+    control_layout->addWidget(order_button);
     QHBoxLayout *label_layout = new QHBoxLayout;
     label_layout->addWidget(message);
     label_layout->addWidget(correct_mes);
@@ -94,6 +99,7 @@ EListener::EListener(QWidget *parent)
     connect(answer_button,SIGNAL(clicked()),this,SLOT(answer()));
     connect(input_box,SIGNAL(returnPressed()),this,SLOT(checkAnswer()));
     connect(diff_button,SIGNAL(clicked()),this,SLOT(changeDiff()));
+    connect(order_button,SIGNAL(clicked()),this,SLOT(changeOrder()));
 }
 
 EListener::~EListener(){
@@ -122,6 +128,8 @@ void EListener::openFile(){
         correct=0;
         incorrect=0;
         difficulty=0;
+        order=1;
+        present_question_index = 0;
         front_delay=0;
         back_delay=0;
         message->setText(QString("hits:")+QString::number(hits));
@@ -134,6 +142,7 @@ void EListener::openFile(){
         next_button->setEnabled(true);
         answer_button->setEnabled(true);
         diff_button->setEnabled(true);
+        order_button->setEnabled(true);
         input_box->setReadOnly(false);
         file_name.append("s");
         QFile words_file(file_name);
@@ -219,7 +228,12 @@ void EListener::checkAnswer(){
 
 void EListener::getQuestion(){
     answered = 0;
-    present_question_index = qrand()%(questions->size());
+    if(order==0){
+        present_question_index = qrand()%(questions->size());
+    }
+    else {
+        present_question_index = (present_question_index + 1)%(questions->size());
+    }
     if(difficulty==0){
         QString hint = questions->at(present_question_index).words;
         makeBlank(hint);
@@ -232,6 +246,11 @@ void EListener::getQuestion(){
 
 void EListener::changeDiff(){
     difficulty = (!difficulty);
+    next();
+}
+
+void EListener::changeOrder(){
+    order = (!order);
     next();
 }
 
