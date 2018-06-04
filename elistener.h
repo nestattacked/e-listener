@@ -23,19 +23,21 @@ public slots:
     void openFile();
     void play();
     void next();
+    void last();
     void answer();
     void checkAnswer();
     void changeDiff();
     void changeOrder();
 private:
     void makeBlank(QString &hint);
-    void getQuestion();
+    void getQuestion(bool forward);
     qint64 strToInt(const QString &str);
     QPlainTextEdit *text;
     QLineEdit *input_box;
     QVideoWidget *video_widget;
     QPushButton *play_button;
     QPushButton *next_button;
+    QPushButton *last_button;
     QPushButton *answer_button;
     QPushButton *open_button;
     QPushButton *diff_button;

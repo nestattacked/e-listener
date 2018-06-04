@@ -28,6 +28,7 @@ EListener::EListener(QWidget *parent)
     video_widget = new QVideoWidget(this);
     play_button = new QPushButton(this);
     next_button = new QPushButton(this);
+    last_button = new QPushButton(this);
     answer_button= new QPushButton(this);
     open_button = new QPushButton(this);
     diff_button = new QPushButton(this);
@@ -46,13 +47,13 @@ EListener::EListener(QWidget *parent)
     //set palyer output
     player->setVideoOutput(video_widget);
     //set ui size
-    setFixedSize(600,600);
-    video_widget->setFixedHeight(350);
+    text->setFixedHeight(100);
     //set widget to enabled state
     text->setReadOnly(true);
     input_box->setReadOnly(true);
     play_button->setEnabled(false);
     next_button->setEnabled(false);
+    last_button->setEnabled(false);
     answer_button->setEnabled(false);
     diff_button->setEnabled(false);
     order_button->setEnabled(false);
@@ -60,21 +61,24 @@ EListener::EListener(QWidget *parent)
     play_button->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     open_button->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
     next_button->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
+    last_button->setIcon(style()->standardIcon(QStyle::SP_ArrowLeft));
     answer_button->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
-    diff_button->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-    order_button->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
+    diff_button->setIcon(style()->standardIcon(QStyle::SP_ArrowUp));
+    order_button->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
     //set button's shortcut
     open_button->setShortcut(QKeySequence(Qt::Key_F1));
-    play_button->setShortcut(QKeySequence(Qt::Key_F2));
+    last_button->setShortcut(QKeySequence(Qt::Key_F2));
     next_button->setShortcut(QKeySequence(Qt::Key_F3));
-    answer_button->setShortcut(QKeySequence(Qt::Key_F4));
-    diff_button->setShortcut(QKeySequence(Qt::Key_F5));
-    order_button->setShortcut(QKeySequence(Qt::Key_F6));
+    play_button->setShortcut(QKeySequence(Qt::Key_F4));
+    answer_button->setShortcut(QKeySequence(Qt::Key_F5));
+    diff_button->setShortcut(QKeySequence(Qt::Key_F6));
+    order_button->setShortcut(QKeySequence(Qt::Key_F7));
     //set layout
     QHBoxLayout *control_layout = new QHBoxLayout;
     control_layout->addWidget(open_button);
-    control_layout->addWidget(play_button);
+    control_layout->addWidget(last_button);
     control_layout->addWidget(next_button);
+    control_layout->addWidget(play_button);
     control_layout->addWidget(answer_button);
     control_layout->addWidget(diff_button);
     control_layout->addWidget(order_button);
@@ -90,12 +94,15 @@ EListener::EListener(QWidget *parent)
     main_layout->addWidget(text);
     main_layout->addWidget(input_box);
     main_layout->addLayout(control_layout);
+    main_layout->setStretchFactor(label_layout, 0);
+    main_layout->setStretchFactor(video_widget, 1);
     setLayout(main_layout);
 
     //initialize connections
     connect(open_button,SIGNAL(clicked()),this,SLOT(openFile()));
     connect(play_button,SIGNAL(clicked()),this,SLOT(play()));
     connect(next_button,SIGNAL(clicked()),this,SLOT(next()));
+    connect(last_button,SIGNAL(clicked()),this,SLOT(last()));
     connect(answer_button,SIGNAL(clicked()),this,SLOT(answer()));
     connect(input_box,SIGNAL(returnPressed()),this,SLOT(checkAnswer()));
     connect(diff_button,SIGNAL(clicked()),this,SLOT(changeDiff()));
@@ -108,6 +115,7 @@ EListener::~EListener(){
     delete video_widget;
     delete play_button;
     delete next_button;
+    delete last_button;
     delete answer_button;
     delete open_button;
     delete diff_button;
@@ -129,7 +137,7 @@ void EListener::openFile(){
         incorrect=0;
         difficulty=0;
         order=1;
-        present_question_index = 0;
+        present_question_index = -1;
         front_delay=0;
         back_delay=0;
         message->setText(QString("hits:")+QString::number(hits));
@@ -140,6 +148,7 @@ void EListener::openFile(){
         player->setMedia(QUrl::fromLocalFile(file_name));
         play_button->setEnabled(true);
         next_button->setEnabled(true);
+        last_button->setEnabled(true);
         answer_button->setEnabled(true);
         diff_button->setEnabled(true);
         order_button->setEnabled(true);
@@ -161,7 +170,7 @@ void EListener::openFile(){
                 questions->append(q);
             }
             words_file.close();
-            getQuestion();
+            getQuestion(true);
         }
     }
 }
@@ -172,13 +181,21 @@ void EListener::play(){
     begin = begin-front_delay<0?0:begin-front_delay;
     player->setPosition(begin);
     qint64 duration = questions->at(present_question_index).end_time - questions->at(present_question_index).start_time + front_delay + back_delay;
+    if (duration < 0) {
+        duration = 0;
+    }
     connect(timer,SIGNAL(timeout()),player,SLOT(pause()));
     timer->start(duration);
     player->play();
 }
 
 void EListener::next(){
-    getQuestion();
+    getQuestion(true);
+    play();
+}
+
+void EListener::last(){
+    getQuestion(false);
     play();
 }
 
@@ -226,13 +243,13 @@ void EListener::checkAnswer(){
     percent_mes->setText(QString("percent:")+QString::number(((double)correct)/(incorrect+correct)));
 }
 
-void EListener::getQuestion(){
+void EListener::getQuestion(bool forward){
     answered = 0;
     if(order==0){
         present_question_index = qrand()%(questions->size());
     }
     else {
-        present_question_index = (present_question_index + 1)%(questions->size());
+        present_question_index = (forward ? present_question_index + 1 : present_question_index - 1 + questions->size())%(questions->size());
     }
     if(difficulty==0){
         QString hint = questions->at(present_question_index).words;
