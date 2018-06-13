@@ -1,6 +1,6 @@
 ### How to use
 
-find a video and a subtitle file and put them in the same directory. if video is named xxx.avi then subtitle has to be named xxx.avis.
+find a video and a subtitle file and put them in the same directory. if video is named xxx.avi then subtitle has to be named xxx.srt. yes, e-listener only supports srt format.
 
 open video in e-listener, and find out how to use it by yourself, it's simple.
 
@@ -8,7 +8,7 @@ open video in e-listener, and find out how to use it by yourself, it's simple.
 -d 1000 2000
 ```
 
-there is a command used to adjust time of playing, type it into input box and hit enter! command above means to play video 1 second earlies and 2 seconds later, minus number is supported.
+there is a command used to adjust timing of playing, type it into input box and hit enter! command above means to play video 1 second earlies and 2 seconds later, minus number is supported.
 
 ### requirement
 
@@ -16,6 +16,6 @@ in order to let e-listener work in windows, you'll get to download [k-lit codec 
 
 ### How to get software
 
-if you are user from windows, you can just download a runable software from [here](https://pan.baidu.com/s/15v2hlQeYSYiECBqYCM_P6A), double click it and it's running!
+if you are user from windows, you can just download a runable software from [here](https://pan.baidu.com/s/1TsjYVJzgxgKNyZP3UTrstw), double click it and it's running!
 
 or unfortunately you are not a windows user, then build it by yourself with Qt tools.

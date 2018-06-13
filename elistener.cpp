@@ -40,6 +40,7 @@ EListener::EListener(QWidget *parent)
     correct_mes = new QLabel(this);
     incorrect_mes = new QLabel(this);
     percent_mes = new QLabel(this);
+    done_mes = new QLabel(this);
 
     player->setVolume(100);
     //initialize timer
@@ -87,6 +88,7 @@ EListener::EListener(QWidget *parent)
     label_layout->addWidget(correct_mes);
     label_layout->addWidget(incorrect_mes);
     label_layout->addWidget(percent_mes);
+    label_layout->addWidget(done_mes);
 
     QVBoxLayout *main_layout = new QVBoxLayout;
     main_layout->addWidget(video_widget);
@@ -126,6 +128,7 @@ EListener::~EListener(){
     delete correct_mes;
     delete incorrect_mes;
     delete percent_mes;
+    delete done_mes;
 }
 
 void EListener::openFile(){
@@ -144,6 +147,7 @@ void EListener::openFile(){
         correct_mes->setText(QString("correct:")+QString::number(correct));
         incorrect_mes->setText(QString("incorrect:")+QString::number(incorrect));
         percent_mes->setText(QString("percent:0"));
+        done_mes->setText(QString("done:0/0"));
         questions->clear();
         player->setMedia(QUrl::fromLocalFile(file_name));
         play_button->setEnabled(true);
@@ -153,20 +157,27 @@ void EListener::openFile(){
         diff_button->setEnabled(true);
         order_button->setEnabled(true);
         input_box->setReadOnly(false);
-        file_name.append("s");
+        file_name.replace(QRegExp(".[^.]+$"), ".srt");
         QFile words_file(file_name);
         if(words_file.open(QIODevice::Text|QIODevice::ReadOnly)){
             while(!words_file.atEnd()){
                 Question q;
-                QString start = words_file.readLine();
-                QString end = words_file.readLine();
+                words_file.readLine();
+                QStringList times = QString(words_file.readLine()).split(QRegExp(" --> "));
+                QString start = times[0];
+                QString end = times[1];end.chop(1);
                 //set question's time
                 q.start_time = strToInt(start);
                 q.end_time = strToInt(end);
                 //set question's words
-                q.words = words_file.readLine();
-                q.words.chop(1);
-
+                QStringList words;
+                QString line = words_file.readLine();
+                while(line != "\n" && !line.isEmpty()){
+                    line.chop(1);
+                    words.append(line);
+                    line = words_file.readLine();
+                }
+                q.words = words.join(' ');
                 questions->append(q);
             }
             words_file.close();
@@ -259,6 +270,7 @@ void EListener::getQuestion(bool forward){
     else{
         text->clear();
     }
+    done_mes->setText(QString("done:")+QString::number(present_question_index+1)+QString("/")+QString::number(questions->length()));
 }
 
 void EListener::changeDiff(){
